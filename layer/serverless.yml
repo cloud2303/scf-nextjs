@@ -1,0 +1,15 @@
+org: next
+app: next
+stage: release
+component: layer
+name: next-layer
+
+inputs:
+  region: ap-hongkong
+  name: ${name}
+  src: ../node_modules
+  runtimes:
+    - Nodejs10.15
+    - Nodejs12.16
+    - Nodejs14.18
+    - Nodejs16.13

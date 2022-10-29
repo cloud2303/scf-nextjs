@@ -1,0 +1,59 @@
+component: http
+name: next-demo
+# 出问题记得 scf deploy --force
+inputs:
+  region: ap-hongkong
+  src:
+    dist: ./
+    hook: ls .. 
+    # npm run build 因为api不挂梯子没法访问，所以提前build再上传
+    # 如果 其他api可以替换回build
+    # hook一定要有命令，不然会上传默认模板
+
+    exclude:
+      - .env
+      - .next/.cache
+      - node_modules
+  faas: 
+    framework: nextjs
+    runtime: Nodejs16.13
+    timeout: 10 # 超时时间，单位秒
+    memorySize: 512 # 内存大小，单位MB
+    # environments: #  环境变量
+    #   - key: VIKA_TOKEN
+    #     value: ${env:VIKA_TOKEN}
+    #   - key: SESSION_SECRET
+    #     value: ${env:SESSION_SECRET}
+    layers:
+      - name: next-layer
+        version: 2
+  assets:
+    cos:
+      bucket: static #你的存储桶的名字
+      sources:
+        - src: '.next/static'
+          targetDir: '/_next/static/' 
+      # 静态资源目录搞对才行
+  #不做自定义域名可以注释下方代码
+  apigw: # http 组件会默认帮忙创建一个 API 网关服务
+    # isDisabled: true
+    # id: service-edx4nlta # api网关服务ID
+    # name: serverless # api网关服务ID
+    api: # 创建的 API 相关配置
+      cors: true #  允许跨域
+    protocols:
+      - http
+      - https
+    environment: release
+    # customDomains: # 自定义域名绑定
+    #   - domain: hello.jiahug.com # 待绑定的自定义的域名
+    #     certId: NSP4s # 待绑定自定义域名的证书唯一 ID
+    # 如要设置自定义路径映射，(customMap = true isDefaultMapping = false)必须两者同时出现 其余情况都是默认路径
+    #     customMap: true #自定义映射路径 不能删
+    #     isDefaultMapping: false  #自定义映射路径  不能删
+    #     pathMap:
+    #       - path: /
+    #         environment: release
+    #     protocols: # 绑定自定义域名的协议类型，默认与服务的前端协议一致。
+    #       - http # 支持http协议
+    #       - https # 支持https协议
